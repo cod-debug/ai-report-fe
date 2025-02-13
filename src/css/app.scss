@@ -1,1 +1,24 @@
-// app global css in SCSS form
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: $dark;
+    border-radius: 10px;
+    box-shadow: inset 0 0 3px 0px black;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $accent;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #eb8181;
+}
+
+* {
+    box-sizing: border-box;
+}
