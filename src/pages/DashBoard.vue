@@ -2,6 +2,7 @@
   <q-layout>
     <q-page-container>
       <q-page class="bg-black text-white">
+        <q-spinner-tail size="2rem" v-if="sendPromptData.loading" />
         <div class="whole-page q-pa-md">
           <div class="action-btn-holder">
             <div class="btn-top-actions">
@@ -13,16 +14,17 @@
           </div>
           <div class="response-holder container">
             <div class="left-side">
-              <q-card class="propmt-card">
+              <div class="relative">
                 <q-input
-                  class="additional-input"
+                  class="additional-input text-white"
                   v-model="AdditionalPrompt"
-                  filled
                   label="Additional Promt Base on the Result"
                   type="textarea"
+                  outlined
+                  color="accent"
                 ></q-input>
-                <q-btn label="Send" class="btn-sendPromt" @click="sendPrompt" />
-              </q-card>
+                <q-btn label="Send" class="btn-sendPromt" color="primary" filled @click="sendAdditionalPrompt" />
+              </div>
 
               <q-section class="text-section">
                 <div class="text-p">{{ outputMessageTitle }}</div>
@@ -64,6 +66,13 @@
 import { ref } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Bar } from 'vue-chartjs'
+import { promptStore } from 'src/stores/prompt.js';
+import { storeToRefs } from 'pinia';
+
+const $promptStore = promptStore();
+
+const { sendPromptData } = storeToRefs($promptStore);
+const { sendPrompt } = $promptStore;
 
 // Register Chart.js components
 Chart.register(...registerables)
@@ -104,32 +113,18 @@ const typeText = (target, text, speed = 50) => {
   }, speed)
 }
 
-const handleButtonClick = (btnLabel) => {
-  switch (btnLabel) {
-    case 'Generate Quarter View of AHT in Bar Graph':
-      showChart.value = true
-
-      typeText(resultMessageTitle, "Here's the quarter view of AHT in Bar Graph")
-
-      typeText(
-        resultText,
-        'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
-      )
-      break
-
-    case 'Generate the FCR for Supervisor 2':
-      typeText(resultMessageTitle, "Here's the FCR for Supervisor 2")
-
-      typeText(
-        resultText,
-        'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
-      )
-      break
+const handleButtonClick = async (btnLabel) => {
+  let payload = {
+    prompt: btnLabel,
   }
+
+  await sendPrompt(payload);
+  const response = sendPromptData;
+  console.log(response);
 }
 
 const buttons = ref([
-  { label: 'Generate the FCR for Supervisor 2', color: 'transparent' },
+  { label: 'Generate the FCR for Supervisor 1', color: 'transparent' },
   { label: 'Generate Quarter View of AHT in Bar Graph', color: 'transparent' },
   { label: 'Generate Customer Satisfaction for Supervisor 1', color: 'transparent' },
   { label: 'Generate CRES for this month', color: 'transparent' },
@@ -142,7 +137,7 @@ const buttons = ref([
 const outputMessageTitle = ref('')
 const outputText = ref('')
 
-const sendPrompt = () => {
+const sendAdditionalPrompt = () => {
   typeText(outputMessageTitle, "Here's the quarter view of AHT in Bar Graph")
 
   typeText(outputText, 'Lorem Ipsum is simply dummy text of the printing and typesetting industry')
@@ -224,11 +219,13 @@ const sendPrompt = () => {
 }
 
 .btn-sendPromt {
-  background: #660202e7;
-  width: 100px;
-  border-radius: 10px;
-  color: white;
-  margin: 10px 10px 10px auto;
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.relative {
+  position: relative;
 }
 
 .output-text {
@@ -270,5 +267,15 @@ const sendPrompt = () => {
   .response-holder {
     flex-grow: 1;
   }
+}
+
+.additional-input .q-field__control.relative-position.row.no-wrap {
+  border: 1px solid;
+}
+.additional-input .q-field__label {
+  color: $primary;
+}
+.additional-input .q-field__native {
+  color: $white!important;
 }
 </style>
