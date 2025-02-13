@@ -1,54 +1,59 @@
 <template>
   <q-layout>
     <q-page-container>
-      <q-page class="q-pa-md bg-dark text-white">
-        <div class="action-btn-holder">
-          <q-btn label="Print Response" class="btn-print" @click="printResult" />
-          <q-btn label="Export to PDF" class="btn-export" @click="exportToPdf" />
-        </div>
+      <q-page class="bg-black text-white">
+        <div class="whole-page q-pa-md">
+          <div class="action-btn-holder">
+            <div class="btn-top-actions">
+              <q-btn label="Print Response" flat @click="printResult" class="full-width" />
+            </div>
+            <div class="btn-top-actions">
+              <q-btn label="Export to PDF" flat @click="exportToPdf" class="full-width" />
+            </div>
+          </div>
+          <div class="response-holder container">
+            <div class="left-side">
+              <q-card class="propmt-card">
+                <q-input
+                  class="additional-input"
+                  v-model="AdditionalPrompt"
+                  filled
+                  label="Additional Promt Base on the Result"
+                  type="textarea"
+                ></q-input>
+                <q-btn label="Send" class="btn-sendPromt" @click="sendPrompt" />
+              </q-card>
 
-        <div class="container">
-          <div class="left-side">
-            <q-card class="propmt-card">
-              <q-input
-                class="additional-input"
-                v-model="AdditionalPrompt"
-                filled
-                label="Additional Promt Base on the Result"
-                type="textarea"
-              ></q-input>
-              <q-btn label="Send" class="btn-sendPromt" @click="sendPrompt" />
-            </q-card>
+              <q-section class="text-section">
+                <div class="text-p">{{ outputMessageTitle }}</div>
+                <div class="output-text text-p q-mt-md">{{ outputText }}</div>
+              </q-section>
+            </div>
 
-            <q-section class="text-section">
-              <div class="text-p">{{ outputMessageTitle }}</div>
-              <div class="output-text text-p q-mt-md">{{ outputText }}</div>
-            </q-section>
+            <div class="right-side">
+              <q-card class="result-container">
+                <q-card-section v-if="showChart">
+                  <Bar :data="chartData" :options="chartOptions" class="result-chart" />
+                </q-card-section>
+
+                <q-card-section>
+                  <div class="text-p">{{ resultMessageTitle }}</div>
+                  <div class="output-text text-p q-mt-md">{{ resultText }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
           </div>
 
-          <div class="right-side">
-            <q-card class="result-container">
-              <q-card-section v-if="showChart">
-                <Bar :data="chartData" :options="chartOptions" class="result-chart" />
-              </q-card-section>
-
-              <q-card-section>
-                <div class="text-p">{{ resultMessageTitle }}</div>
-                <div class="output-text text-p q-mt-md">{{ resultText }}</div>
-              </q-card-section>
-            </q-card>
+          <div class="query-btn-container">
+            <q-btn
+              v-for="btn in buttons"
+              :key="btn.label"
+              :label="btn.label"
+              :color="btn.color"
+              class="query-btn"
+              @click="handleButtonClick(btn.label)"
+            />
           </div>
-        </div>
-
-        <div class="query-btn-container">
-          <q-btn
-            v-for="btn in buttons"
-            :key="btn.label"
-            :label="btn.label"
-            :color="btn.color"
-            class="query-btn"
-            @click="handleButtonClick(btn.label)"
-          />
         </div>
       </q-page>
     </q-page-container>
@@ -144,7 +149,8 @@ const sendPrompt = () => {
 }
 </script>
 
-<style scope>
+<style scope lang="scss">
+
 .action-btn-holder {
   width: 100%;
   background: transparent;
@@ -155,43 +161,17 @@ const sendPrompt = () => {
   margin-bottom: 10px;
 }
 
-.btn-print,
-.btn-export {
+.btn-top-actions {
   color: rgb(247, 241, 241);
   width: 200px;
-  background: #d8071950;
+  background: linear-gradient(to right, $secondary 0%, $accent 15%, $accent 84%, $secondary 100%);
+  border-radius: 10px;
+  padding: 1px 0;
+  overflow: hidden;
 }
 
-.btn-export::before,
-.btn-print::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 0.5px;
-  background: #660202e7;
-  box-shadow:
-    0 0 1px #660202e7,
-    0 0 1px #660202e7;
-  transition: all 0.3s ease;
-}
-
-.btn-export::after,
-.btn-print::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 1px;
-  background: #660202e7;
-  box-shadow:
-    0 0 1px #660202e7,
-    0 0 10px #660202e7;
-  transition: all 0.3s ease;
+.btn-top-actions .q-btn {
+  background-color: $secondary;
 }
 
 .container {
@@ -199,16 +179,29 @@ const sendPrompt = () => {
   gap: 40px;
 }
 
+.left-side, 
+.right-side {
+  background: linear-gradient(to top, $dark 25%, $dark-page);
+}
+
+.left-side,
+.right-side {
+  box-shadow: inset 0 0 3px 1px black;
+  border-radius: 5px;
+}
+
 .left-side {
   width: 65%;
-  height: 100vh;
-  background: rgb(22, 22, 22);
-  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
-  border-radius: 20px;
   padding: 20px 20px 0 20px;
   display: flex;
   flex-direction: column;
   gap: 30px;
+}
+
+.right-side {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
 }
 
 .propmt-card {
@@ -242,14 +235,6 @@ const sendPrompt = () => {
   text-align: justify;
 }
 
-.right-side {
-  background: rgb(22, 22, 22);
-  width: 35%;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
-}
-
 .result-container {
   background: transparent;
 }
@@ -260,16 +245,30 @@ const sendPrompt = () => {
 }
 
 .query-btn-container {
-  display: flex;
-  margin: 10px 5px 10px 5px;
-  gap: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to top, $dark 28%, $dark-page);
+  padding: 1rem;
+  max-height: 15vh;
+  overflow: auto;
 }
 
 .query-btn {
+  margin: 5px;
   border: 1px solid white;
 }
 
 .query-btn:hover {
   background: white;
+}
+
+.whole-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .response-holder {
+    flex-grow: 1;
+  }
 }
 </style>
