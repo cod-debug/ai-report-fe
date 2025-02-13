@@ -185,8 +185,7 @@ const sendPrompt = () => {
 }
 
 .left-side,
-.right-side,
-.query-btn-container {
+.right-side {
   box-shadow: inset 0 0 3px 1px black;
   border-radius: 5px;
 }
@@ -246,6 +245,7 @@ const sendPrompt = () => {
 }
 
 .query-btn-container {
+  border-radius: 5px;
   background: linear-gradient(to top, $dark 28%, $dark-page);
   padding: 1rem;
   max-height: 15vh;
