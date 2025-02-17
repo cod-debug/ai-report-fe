@@ -8,7 +8,12 @@ export const promptStore = defineStore('promptStore', {
       loading: false,
       data: null,
       error: null,
-    }
+    },
+    sendAdditionalPromptData: {
+      loading: false,
+      data: null,
+      error: null,
+    },
   }),
   getters: {},
   actions: {
@@ -34,8 +39,31 @@ export const promptStore = defineStore('promptStore', {
         // after successful request
         this.sendPromptData.loading = false;
       }
+    },
+    async sendAdditionalPrompt(payload) {
+      this.sendAdditionalPromptData.loading = true;
+      // send request
+      try {
+        const { data } = await axios({
+          method: "POST", // request type
+          url: `${API_BASE_URL}/api/v1/prompt/additional`, // endpoint from BE
+          data: payload, // data to pass to BE
+          headers: { // request headers
+            'Content-Type': 'application/json'
+          },
+        });
+
+        this.sendAdditionalPromptData.data = data;
+        this.sendAdditionalPromptData.error = null;
+      } catch (e) {
+        this.sendAdditionalPromptData.error = e;
+        this.sendAdditionalPromptData.data = null;
+      } finally {
+        // after successful request
+        this.sendAdditionalPromptData.loading = false;
+      }
     }
-  }
+  },
 })
 
 if (import.meta.hot) {
