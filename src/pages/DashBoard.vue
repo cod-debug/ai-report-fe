@@ -2,7 +2,6 @@
   <q-layout>
     <q-page-container>
       <q-page class="bg-black text-white">
-        <q-spinner-tail size="2rem" v-if="sendPromptData.loading" />
         <div class="whole-page q-pa-md">
           <div class="action-btn-holder">
             <div class="btn-top-actions">
@@ -122,13 +121,13 @@ const chartOptions = ref({
 const typedText = ref('')
 const typedAdditinonalResponse = ref('');
 
-const typeText = (target, text, speed = 50) => {
+const typeText = (text, speed = 10) => {
   let i = 0
-  target.value = ''
+  typedText.value = ''
 
   const typingInterval = setInterval(() => {
     if (i < text.length) {
-      target.value += text.charAt(i)
+      typedText.value += text.charAt(i)
       i++
     } else {
       clearInterval(typingInterval)
@@ -149,6 +148,7 @@ const typeAdditionalResponseText = (text, speed = 10) => {
     }
   }, speed)
 }
+
 const watchAIResponse = (source, callback) => {
   watch(
     () => source.value.data,
@@ -175,7 +175,12 @@ const handleSendAdditionalPrompt = async () => {
 }
 
 const handleButtonClick = async (btnLabel) => {
+  // reset typed additional response
+  typedAdditinonalResponse.value = "";
+
+  // set selected prompt to have additoinal condition to highlight selected prompt
   selectedPrompt.value = btnLabel;
+  
   let payload = {
     prompt: btnLabel,
   }
