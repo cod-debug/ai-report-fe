@@ -2,7 +2,6 @@
   <q-layout>
     <q-page-container>
       <q-page class="bg-black text-white">
-        <q-spinner-tail size="2rem" v-if="sendPromptData.loading" />
         <div class="whole-page q-pa-md">
           <div class="action-btn-holder">
             <div class="btn-top-actions">
@@ -23,7 +22,13 @@
                   outlined
                   color="accent"
                 ></q-input>
-                <q-btn label="Send" class="btn-sendPromt" color="primary" filled @click="sendAdditionalPrompt" />
+                <q-btn
+                  label="Send"
+                  class="btn-sendPromt"
+                  color="primary"
+                  filled
+                  @click="sendAdditionalPrompt"
+                />
               </div>
 
               <q-section class="text-section">
@@ -34,13 +39,18 @@
 
             <div class="right-side">
               <q-card class="result-container">
-                <q-card-section v-if="showChart">
-                  <Bar :data="chartData" :options="chartOptions" class="result-chart" />
-                </q-card-section>
-
                 <q-card-section>
-                  <div class="text-p">{{ resultMessageTitle }}</div>
-                  <div class="output-text text-p q-mt-md">{{ resultText }}</div>
+                  <q-spinner v-if="sendPromptData.loading"></q-spinner>
+                  <div v-if="displayContent">
+                    <div v-if="shouldDisplayHtml">
+                      <div v-html="typedText"></div>
+                    </div>
+                    <div v-else>
+                      <q-card-section v-if="showChart">
+                        <Bar :data="chartData" :options="chartOptions" class="result-chart" />
+                      </q-card-section>
+                    </div>
+                  </div>
                 </q-card-section>
               </q-card>
             </div>
@@ -63,16 +73,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Bar } from 'vue-chartjs'
-import { promptStore } from 'src/stores/prompt.js';
-import { storeToRefs } from 'pinia';
+import { promptStore } from 'src/stores/prompt.js'
+import { storeToRefs } from 'pinia'
 
-const $promptStore = promptStore();
+const $promptStore = promptStore()
 
-const { sendPromptData } = storeToRefs($promptStore);
-const { sendPrompt } = $promptStore;
+const { sendPromptData } = storeToRefs($promptStore)
+const { sendPrompt } = $promptStore
 
 // Register Chart.js components
 Chart.register(...registerables)
@@ -96,16 +106,16 @@ const chartOptions = ref({
   maintainAspectRatio: false,
 })
 
-const resultMessageTitle = ref('')
-const resultText = ref()
+const typedText = ref('')
 
-const typeText = (target, text, speed = 50) => {
+// Function to simulate typing effect
+const typeText = (text, speed = 10) => {
   let i = 0
-  target.value = ''
+  typedText.value = ''
 
   const typingInterval = setInterval(() => {
     if (i < text.length) {
-      target.value += text.charAt(i)
+      typedText.value += text.charAt(i)
       i++
     } else {
       clearInterval(typingInterval)
@@ -113,15 +123,31 @@ const typeText = (target, text, speed = 50) => {
   }, speed)
 }
 
+watch(
+  () => sendPromptData.value.data,
+  (newData) => {
+    if (newData && newData.ai_response?.html_format) {
+      typeText(newData.ai_response.html_format)
+    }
+  },
+)
+
 const handleButtonClick = async (btnLabel) => {
   let payload = {
     prompt: btnLabel,
   }
 
-  await sendPrompt(payload);
-  const response = sendPromptData;
-  console.log(response);
+  await sendPrompt(payload)
+  const response = sendPromptData
+  console.log(response)
 }
+
+const displayContent = computed(() => !!sendPromptData.value.data)
+
+// Computed property to determine if html_format should be displayed
+const shouldDisplayHtml = computed(() => {
+  return sendPromptData.value.data && !sendPromptData.value.data.ai_response.graph
+})
 
 const buttons = ref([
   { label: 'Generate the FCR for Supervisor 1', color: 'transparent' },
@@ -145,7 +171,6 @@ const sendAdditionalPrompt = () => {
 </script>
 
 <style scope lang="scss">
-
 .action-btn-holder {
   width: 100%;
   background: transparent;
@@ -174,7 +199,7 @@ const sendAdditionalPrompt = () => {
   gap: 40px;
 }
 
-.left-side, 
+.left-side,
 .right-side {
   background: linear-gradient(to top, $dark 25%, $dark-page);
 }
@@ -276,6 +301,6 @@ const sendAdditionalPrompt = () => {
   color: $primary;
 }
 .additional-input .q-field__native {
-  color: $white!important;
+  color: $white !important;
 }
 </style>
