@@ -185,11 +185,15 @@ const handleButtonClick = async (btnLabel) => {
     prompt: btnLabel,
   }
 
+  
   await sendPrompt(payload)
   const response = sendPromptData.value.data;
-  
-  if(response.error){
-    hasResult.value = false;
+  const error = sendPromptData.value.error;
+
+  if(error){
+    console.log(error.response.data.message);
+    sendPromptData.value.data = {ai_response: { html_format: error.response.data.message}};
+    // hasResult.value = false;
     return false;
   }
 
