@@ -5,6 +5,9 @@
         <div class="whole-page q-pa-md">
           <div class="action-btn-holder">
             <div class="btn-top-actions">
+              <q-btn label="Sync Data" flat @click="handleSyncData" class="full-width" />
+            </div>
+            <div class="btn-top-actions">
               <q-btn label="Print Response" flat @click="printResult" class="full-width" />
             </div>
             <div class="btn-top-actions">
@@ -82,16 +85,26 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, getCurrentInstance  } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 import { promptStore } from 'src/stores/prompt.js';
+import { dataStore } from 'src/stores/data.js';
 import { storeToRefs } from 'pinia';
+import { Notify } from 'quasar';
+
+const { appContext } = getCurrentInstance();
+
+const customSpinner = appContext.config.globalProperties.$spinner;
 
 const $promptStore = promptStore();
+const $dataStore = dataStore();
 
 const { sendPromptData, sendAdditionalPromptData } = storeToRefs($promptStore);
 const { sendPrompt, sendAdditionalPrompt } = $promptStore;
+
+const { syncData } = storeToRefs($dataStore);
+const { sync } = $dataStore;
 
 // Register Chart.js components
 Chart.register(...registerables)
@@ -205,6 +218,35 @@ const handleButtonClick = async (btnLabel) => {
     response.raw_data.map((quarter, key) => {
       chartData.value.datasets[0].data[key] = quarter?.average_handling_time || 0;
     });
+  }
+}
+
+const handleSyncData = async () => {
+  customSpinner.show('Syncing data from google sheet. This may take a couple of minutes.');
+  await sync();
+  
+  const response = syncData.value.data;
+  const error = syncData.value.error;
+
+  if(error){
+    Notify.create({
+      message: 'Unable to sync data.',
+      position: 'top-left',
+      icon: 'times_circle',
+      color: 'red-14'
+    });
+    customSpinner.hide();
+    return false;
+  }
+
+  if(response){
+    Notify.create({
+      message: 'Successfully synced data.',
+      position: 'top-left',
+      icon: 'check_circle',
+      color: 'green-6'
+    });
+    customSpinner.hide();
   }
 }
 
