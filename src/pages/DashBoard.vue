@@ -222,7 +222,7 @@ const handleButtonClick = async (btnLabel) => {
 }
 
 const handleSyncData = async () => {
-  customSpinner.show('Syncing data from google sheet. This may take a couple of minutes.');
+  customSpinner.show('Synchronizing data from Google Sheets. This process may take a few minutes to complete. Thank you for your patience.');
   await sync();
   
   const response = syncData.value.data;
@@ -252,6 +252,7 @@ const handleSyncData = async () => {
 
 const buttons = ref([
   { label: 'Generate the FCR for Supervisor 1', color: 'transparent' },
+  { label: 'Generate the FCR for Supervisor 2', color: 'transparent' },
   { label: 'Generate Quarter View of AHT in Bar Graph', color: 'transparent' },
   { label: 'Generate Customer Satisfaction for Supervisor 1', color: 'transparent' },
   { label: 'Generate CRES for this month', color: 'transparent' },
